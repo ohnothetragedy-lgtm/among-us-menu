@@ -1,0 +1,104 @@
+MaterialTheme(colorScheme = darkColorScheme(
+    background = Page, surface = Panel, primary = Accent,
+    onPrimary = Color(0xFF08130F), onBackground = Color.White,
+    onSurface = Color.White
+)) {
+    Surface(Modifier.fillMaxSize(), color = Page) {
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("AMONG US", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Black)
+                    Text("HOST COMPANION", color = Accent, fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                }
+                StatusPill("COMPANION MODE")
+            }
+
+            Card(colors = CardDefaults.cardColors(containerColor = Panel),
+                shape = RoundedCornerShape(18.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Launch Among Us", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text("Open the original game without modifying it.", color = Color.LightGray, fontSize = 12.sp)
+                    Button(onClick = { launchAmongUs(context) }, modifier = Modifier.fillMaxWidth()) {
+                        Text("OPEN AMONG US")
+                    }
+                }
+            }
+
+            Card(colors = CardDefaults.cardColors(containerColor = Panel),
+                shape = RoundedCornerShape(18.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Lobby notebook", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text("Save the room code you entered in-game. This companion cannot read the game's live lobby automatically.",
+                        color = Color.LightGray, fontSize = 12.sp)
+                    OutlinedTextField(
+                        value = roomCode, onValueChange = { roomCode = it.uppercase().filter { c -> c.isLetterOrDigit() }.take(6) },
+                        modifier = Modifier.fillMaxWidth(), label = { Text("Room code") },
+                        singleLine = true, keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
+                    )
+                    OutlinedButton(
+                        onClick = { copyText(context, roomCode, "Room code copied") },
+                        enabled = roomCode.isNotBlank(), modifier = Modifier.fillMaxWidth()
+                    ) { Text("COPY ROOM CODE") }
+                }
+            }
+
+            Card(colors = CardDefaults.cardColors(containerColor = Panel),
+                shape = RoundedCornerShape(18.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Player checklist", fontWeight = FontWeight.Bold, fontSize = 17.sp,
+                            modifier = Modifier.weight(1f))
+                        StatusPill("${players.size} ADDED")
+                    }
+                    Text("Add names manually as players join. This is not a live player feed.",
+                        color = Color.LightGray, fontSize = 12.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = playerDraft, onValueChange = { playerDraft = it.take(20) },
+                            modifier = Modifier.weight(1f), label = { Text("Player name") }, singleLine = true
+                        )
+                        Button(onClick = {
+                            val name = playerDraft.trim()
+                            if (name.isNotEmpty() && players.none { it.equals(name, true) }) {
+                                players.add(name)
+                                playerDraft = ""
+                            }
+                        }, enabled = playerDraft.isNotBlank()) { Text("ADD") }
+                    }
+                    if (players.isEmpty()) {
+                        Text("No players added yet.", color = Color.Gray, fontSize = 13.sp)
+                    } else {
+                        players.forEachIndexed { index, name ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("${index + 1}.  $name", Modifier.weight(1f), fontSize = 14.sp)
+                                TextButton(onClick = { players.removeAt(index) }) { Text("REMOVE") }
+                            }
+                        }
+                        OutlinedButton(onClick = {
+                            copyText(context, players.joinToString("\n"), "Player list copied")
+                        }, modifier = Modifier.fillMaxWidth()) { Text("COPY PLAYER LIST") }
+                    }
+                }
+            }
+
+            Card(colors = CardDefaults.cardColors(containerColor = Panel),
+                shape = RoundedCornerShape(18.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Connection status", fontWeight = FontWeight.Bold)
+                    StatusPill("NOT CONNECTED")
+                    Text("The standard Android game does not provide this companion app with a supported live lobby API. Host verification, live player sync, role reads and in-game controls are therefore not enabled.",
+                        color = Color.LightGray, fontSize = 12.sp)
+                    Text("No game memory access, traffic interception, overlays or anti-cheat bypass.",
+                        color = Accent, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+            Text("Companion tools for the original Among Us Android app.",
+                color = Color.Gray, fontSize = 11.sp)
+        }
+    }
+}
+}
